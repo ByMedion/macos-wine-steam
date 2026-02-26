@@ -178,6 +178,14 @@ find_steam_exe() {
   fi
 }
 
+cleanup_steam_setup() {
+  if [[ -f "${STEAM_SETUP}" ]]; then
+    log "Cleaning up Steam installer cache"
+    rm -f "${STEAM_SETUP}"
+    echo "Removed ${STEAM_SETUP}."
+  fi
+}
+
 ensure_steam_installed() {
   log "Ensuring Steam is installed in Wine prefix"
   local steam_exe
@@ -197,6 +205,7 @@ ensure_steam_installed() {
 
   steam_exe="$(find_steam_exe || true)"
   [[ -n "${steam_exe}" ]] || die "Steam installation appears incomplete (steam.exe not found)."
+  cleanup_steam_setup
 }
 
 ensure_dxmt_installed() {

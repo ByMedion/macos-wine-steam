@@ -28,7 +28,7 @@ sh run.sh
 - Creates/uses `WINEPREFIX` (default `~/.wine-steam-11`).
 - Creates a symlink in the repo directory pointing to `WINEPREFIX`:
   - `./WINEPREFIX` by default (configurable via `WINEPREFIX_ALIAS_NAME`)
-- Downloads `SteamSetup.exe` into `/tmp`.
+- Downloads `SteamSetup.exe` into `/tmp` and deletes it after Steam is installed.
 - Installs DXMT into `~/DXMT` and prepends that path via `WINEDLLPATH_PREPEND`.
 - Writes a few Wine registry values inside the prefix:
   - `HKCU\\Software\\Wine\\Mac Driver\\RetinaMode` (controlled via `WINE_RETINA_MODE`)
