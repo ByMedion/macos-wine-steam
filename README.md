@@ -9,17 +9,10 @@ For developer details, see the [Developer README](README_DEV.md).
 
 ## Install / Run
 
-1. In Finder, locate the unzipped folder
-2. Right-click the folder and choose `Services` -> `New Terminal at Folder`.
-   - Sometimes, `New Terminal at Folder` may appear directly in the right-click menu (not under `Services`).
-   - Alternative: open Terminal, then drag-and-drop the folder onto the Terminal icon in the Dock to open it in that folder.
-3. In the Terminal window that opens, type:
-
-```bash
-bash run.sh
-```
-
-4. Keep this Terminal window open while Steam is running. Close Terminal only after you exit Steam.
+1. In Finder, locate the unzipped folder.
+2. Double-click `run.command`.
+3. If macOS blocks it, right-click `run.command` -> `Open` -> confirm `Open`.
+4. Keep the Terminal window open while Steam is running. Close Terminal only after you exit Steam.
 
 What to expect:
 - You may be asked for your macOS password (to install Rosetta if it is missing).
@@ -36,13 +29,9 @@ What to expect:
 
 If Steam is running, follow the steps in "Stop" first.
 
-In Terminal, type:
-
-```bash
-bash uninstall.sh
-```
-
-It will ask for confirmation for each item it wants to remove. Type `y` to remove it, or `n` to skip it (if you want to keep something).
+1. Double-click `uninstall.command`.
+2. If macOS blocks it, right-click `uninstall.command` -> `Open` -> confirm `Open`.
+3. It will ask for confirmation for each item it wants to remove. Type `y` to remove it, or `n` to skip it (if you want to keep something).
 
 ## Notes
 
@@ -53,12 +42,12 @@ It will ask for confirmation for each item it wants to remove. Type `y` to remov
 
 ## What The Scripts Do (Short)
 
-`run.sh`:
+`run.command`:
 - Installs Rosetta 2 (only if missing; requires `sudo`).
 - Downloads Wine Staging (Gcenx macOS Wine builds) and sets up a Steam Wine prefix.
 - Downloads and installs Steam into that prefix.
 - Downloads DXMT and enables it for Wine.
 
-`uninstall.sh`:
-- Removes files/directories created by `run.sh` (with per-item confirmation).
+`uninstall.command`:
+- Removes files/directories created by `run.command` (with per-item confirmation).
 - Does not remove Rosetta 2.

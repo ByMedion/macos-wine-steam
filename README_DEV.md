@@ -1,13 +1,13 @@
 # Developer README
 
-This file documents implementation details for `run.sh` and `uninstall.sh`.
+This file documents implementation details for `run.command` and `uninstall.command`.
 
 ## Source
 
 Inspired by:
 https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/
 
-## What `run.sh` Does
+## What `run.command` Does
 
 - Checks platform:
   - macOS only
@@ -40,7 +40,7 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
 
 ## Configuration (Environment Variables)
 
-Defaults are the values in `run.sh`.
+Defaults are the values in `run.command`.
 
 - `WINE_VERSION`
   - Wine build version to download (default: `11.3`)
@@ -51,7 +51,7 @@ Defaults are the values in `run.sh`.
 - `WINEPREFIX`
   - Where the Steam prefix lives (default: `~/.wine-steam-11`)
 - `WINEPREFIX_ALIAS_NAME`
-  - Name of the symlink created next to `run.sh` (default: `WINEPREFIX`)
+  - Name of the symlink created next to `run.command` (default: `WINEPREFIX`)
 - `WINE_RETINA_MODE`
   - `1` enables, `0` disables (default: `0`)
 - `WINE_MOUSE_WARP_OVERRIDE`
@@ -61,12 +61,12 @@ Defaults are the values in `run.sh`.
 Example overrides (environment variables):
 
 ```bash
-WINEPREFIX="$HOME/Games/SteamPrefix" WINE_RETINA_MODE=1 bash run.sh
+WINEPREFIX="$HOME/Games/SteamPrefix" WINE_RETINA_MODE=1 ./run.command
 ```
 
-## What `uninstall.sh` Removes
+## What `uninstall.command` Removes
 
-Targets are controlled by environment variables (defaults are the values in `uninstall.sh`):
+Targets are controlled by environment variables (defaults are the values in `uninstall.command`):
 
 - `WINE_VERSION`
 - `WINE_ROOT`
@@ -77,12 +77,12 @@ Targets are controlled by environment variables (defaults are the values in `uni
 
 Notes:
 
-- `uninstall.sh` asks for confirmation per item and shows progress as `[X/N]`.
-- `uninstall.sh` does not remove Rosetta 2.
-- Use the same `WINE_VERSION`/`WINE_ROOT`/`WINEPREFIX` values you used with `run.sh` to uninstall the correct locations.
+- `uninstall.command` asks for confirmation per item and shows progress as `[X/N]`.
+- `uninstall.command` does not remove Rosetta 2.
+- Use the same `WINE_VERSION`/`WINE_ROOT`/`WINEPREFIX` values you used with `run.command` to uninstall the correct locations.
 
 ## Notes
 
-- If Wine/DXMT/Steam are already present in the expected locations, `run.sh` skips those steps.
+- If Wine/DXMT/Steam are already present in the expected locations, `run.command` skips those steps.
 - The scripts do not change macOS system settings (pointer acceleration, polling rate, etc.).
 - Tested on Apple M1 Max (32GB), macOS Sequoia 15.7.4.

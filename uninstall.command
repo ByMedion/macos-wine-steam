@@ -97,7 +97,7 @@ main() {
   echo "4. DXMT_ROOT: ${DXMT_ROOT}"
   echo "5. WINE_ROOT: ${WINE_ROOT}"
 
-  log "Removing artifacts from run.sh"
+  log "Removing artifacts from run.command"
   remove_file "${STEAM_SETUP}" "Steam installer file"
   remove_alias
   remove_dir "${WINEPREFIX}" "Wine prefix directory"
