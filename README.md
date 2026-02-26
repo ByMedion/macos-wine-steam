@@ -65,6 +65,30 @@ Example:
 WINEPREFIX="$HOME/Games/SteamPrefix" WINE_RETINA_MODE=1 ./run.sh
 ```
 
+## Uninstall
+
+`uninstall.sh` removes files/directories created by `run.sh`. It asks for confirmation for each item and shows progress as `[X/N]`.
+
+Run from the repo directory:
+
+```bash
+sh uninstall.sh
+```
+
+Uninstall targets are controlled by environment variables (defaults are the values in `uninstall.sh`):
+
+- `WINE_VERSION`
+- `WINE_ROOT`
+- `WINEPREFIX`
+- `DXMT_ROOT`
+- `STEAM_SETUP`
+- `WINEPREFIX_ALIAS_NAME`
+
+Notes:
+
+- `uninstall.sh` does not remove Rosetta 2.
+- Use the same `WINE_VERSION`/`WINE_ROOT`/`WINEPREFIX` values you used with `run.sh` to uninstall the correct locations.
+
 ## Notes
 
 - Tested on Apple M1 Max (32GB), macOS Sequoia 15.7.4.
