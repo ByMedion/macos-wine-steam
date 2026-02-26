@@ -1,96 +1,64 @@
-# Steam + Wine + DXMT Runner (Apple Silicon)
+# Run Windows Steam games on Apple Silicon Mac (Wine + DXMT)
 
-This repo contains a single launcher script, `run.sh`, that sets up:
-- Rosetta (if needed)
-- Wine Staging (downloaded from Gcenx macOS Wine builds)
-- a Steam Wine prefix
-- DXMT (installed into `~/DXMT`, enabled via `WINEDLLPATH_PREPEND`)
+For developer details, see the [Developer README](README_DEV.md).
 
-Then it launches Steam.
+## Download
 
-## Source
+1. Click the green button `Code`, then `Download ZIP`.
+2. Unzip the downloaded ZIP file (double-click it).
 
-Inspired by this Reddit post:
-https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/
+## Install / Run
 
-## Run
-
-From the repo directory:
+1. In Finder, locate the unzipped folder
+2. Right-click the folder and choose `Services` -> `New Terminal at Folder`.
+   - Sometimes, `New Terminal at Folder` may appear directly in the right-click menu (not under `Services`).
+   - Alternative: open Terminal, then drag-and-drop the folder onto the Terminal icon in the Dock to open it in that folder.
+3. In the Terminal window that opens, type:
 
 ```bash
-sh run.sh
+bash run.sh
 ```
 
-## What `run.sh` does
+4. Keep this Terminal window open while Steam is running. Close Terminal only after you exit Steam.
 
-- Installs Rosetta 2 if missing (requires `sudo`).
-- Creates/uses `WINE_ROOT` (default `~/wine-<version>`).
-- Creates/uses `WINEPREFIX` (default `~/.wine-steam-11`).
-- Creates a symlink in the repo directory pointing to `WINEPREFIX`:
-  - `./WINEPREFIX` by default (configurable via `WINEPREFIX_ALIAS_NAME`)
-- Downloads `SteamSetup.exe` into `/tmp` and deletes it after Steam is installed.
-- Installs DXMT into `~/DXMT` and prepends that path via `WINEDLLPATH_PREPEND`.
-- Writes a few Wine registry values inside the prefix:
-  - `HKCU\\Software\\Wine\\Mac Driver\\RetinaMode` (controlled via `WINE_RETINA_MODE`)
-  - Windows mouse acceleration disable (Enhanced Pointer Precision):
-    - `HKCU\\Control Panel\\Mouse\\MouseSpeed = 0`
-    - `HKCU\\Control Panel\\Mouse\\MouseThreshold1 = 0`
-    - `HKCU\\Control Panel\\Mouse\\MouseThreshold2 = 0`
-  - Optional DirectInput mouse warp override:
-    - `HKCU\\Software\\Wine\\DirectInput\\MouseWarpOverride` (controlled via `WINE_MOUSE_WARP_OVERRIDE`)
+What to expect:
+- You may be asked for your macOS password (to install Rosetta if it is missing).
+- First run can take a while because it downloads Wine, DXMT, and Steam installer.
+- At the end, Steam should launch inside Wine.
 
-## Configuration (Environment Variables)
+## Stop
 
-Defaults are the values in `run.sh`.
-
-- `WINE_VERSION`
-  - Wine build version to download (default: `11.3`)
-- `DXMT_VERSION`
-  - DXMT release version to download (default: `0.73`)
-- `WINE_ROOT`
-  - Where Wine is extracted (default: `~/wine-$WINE_VERSION`)
-- `WINEPREFIX`
-  - Where the Steam prefix lives (default: `~/.wine-steam-11`)
-- `WINEPREFIX_ALIAS_NAME`
-  - Name of the symlink created next to `run.sh` (default: `WINEPREFIX`)
-- `WINE_RETINA_MODE`
-  - `1` enables, `0` disables (default: `0`)
-- `WINE_MOUSE_WARP_OVERRIDE`
-  - Empty keeps Wine default (and removes the key if it was set before)
-  - Allowed values: `force`, `enable`, `disable`
-
-Example:
-
-```bash
-WINEPREFIX="$HOME/Games/SteamPrefix" WINE_RETINA_MODE=1 ./run.sh
-```
+1. In Steam, use the menu: `Steam` -> `Exit`.
+2. Wait until Steam fully closes.
+3. Close Terminal.
 
 ## Uninstall
 
-`uninstall.sh` removes files/directories created by `run.sh`. It asks for confirmation for each item and shows progress as `[X/N]`.
+If Steam is running, follow the steps in "Stop" first.
 
-Run from the repo directory:
+In Terminal, type:
 
 ```bash
-sh uninstall.sh
+bash uninstall.sh
 ```
 
-Uninstall targets are controlled by environment variables (defaults are the values in `uninstall.sh`):
-
-- `WINE_VERSION`
-- `WINE_ROOT`
-- `WINEPREFIX`
-- `DXMT_ROOT`
-- `STEAM_SETUP`
-- `WINEPREFIX_ALIAS_NAME`
-
-Notes:
-
-- `uninstall.sh` does not remove Rosetta 2.
-- Use the same `WINE_VERSION`/`WINE_ROOT`/`WINEPREFIX` values you used with `run.sh` to uninstall the correct locations.
+It will ask for confirmation for each item it wants to remove. Type `y` to remove it, or `n` to skip it (if you want to keep something).
 
 ## Notes
 
+- Apple Silicon only. Intel Macs are not supported by this script.
 - Tested on Apple M1 Max (32GB), macOS Sequoia 15.7.4.
-- If Steam/Wine/DXMT are already installed in the expected locations, the script skips those steps.
-- Mouse settings in macOS (pointer acceleration, polling rate, etc.) are not changed by the script.
+- Inspired by this Reddit post:
+  https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/
+
+## What The Scripts Do (Short)
+
+`run.sh`:
+- Installs Rosetta 2 (only if missing; requires `sudo`).
+- Downloads Wine Staging (Gcenx macOS Wine builds) and sets up a Steam Wine prefix.
+- Downloads and installs Steam into that prefix.
+- Downloads DXMT and enables it for Wine.
+
+`uninstall.sh`:
+- Removes files/directories created by `run.sh` (with per-item confirmation).
+- Does not remove Rosetta 2.
