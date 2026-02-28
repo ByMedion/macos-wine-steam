@@ -85,4 +85,6 @@ Notes:
 
 - If Wine/DXMT/Steam are already present in the expected locations, `run.command` skips those steps.
 - The scripts do not change macOS system settings (pointer acceleration, polling rate, etc.).
-- Tested on Apple M1 Max (32GB), macOS Sequoia 15.7.4.
+- Tested on:
+  - Apple M1 Max (32GB), macOS Sequoia 15.7.4
+  - Apple M2 Pro (16GB), macOS Sequoia 15.7.4

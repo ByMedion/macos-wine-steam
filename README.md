@@ -36,7 +36,9 @@ If Steam is running, follow the steps in "Stop" first.
 ## Notes
 
 - Apple Silicon only. Intel Macs are not supported by this script.
-- Tested on Apple M1 Max (32GB), macOS Sequoia 15.7.4.
+- Tested on:
+  - Apple M1 Max (32GB), macOS Sequoia 15.7.4
+  - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
 - Inspired by this Reddit post:
   https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/
 
