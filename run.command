@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="${SCRIPT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
 
 WINE_VERSION="${WINE_VERSION:-11.3}"
 DXMT_VERSION="${DXMT_VERSION:-0.73}"
@@ -244,6 +244,11 @@ enable_dxmt_env() {
     *":${DXMT_ROOT}:"*) ;;
     *) WINEDLLPATH_PREPEND="${DXMT_ROOT}${WINEDLLPATH_PREPEND:+:${WINEDLLPATH_PREPEND}}" ;;
   esac
+
+  # TODO: These DXMT defaults are tuned for testing (Binding of Isaac).
+  # Replace with a config-file approach or remove before upstreaming.
+  export DXMT_CONFIG="${DXMT_CONFIG:-d3d11.preferredMaxFrameRate=60;}"
+  export DXMT_LOG_LEVEL="${DXMT_LOG_LEVEL:-none}"
 }
 
 launch_steam() {
@@ -251,7 +256,13 @@ launch_steam() {
   local steam_exe
   steam_exe="$(find_steam_exe || true)"
   [[ -n "${steam_exe}" ]] || die "steam.exe not found."
-  "${WINE_BIN}" "${steam_exe}"
+
+  if [[ -n "${STEAM_GAME_ID:-}" ]]; then
+    echo "Launching Steam game ${STEAM_GAME_ID}..."
+    "${WINE_BIN}" "${steam_exe}" -applaunch "${STEAM_GAME_ID}"
+  else
+    "${WINE_BIN}" "${steam_exe}"
+  fi
 }
 
 main() {

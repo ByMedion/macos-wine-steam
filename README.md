@@ -9,6 +9,19 @@ For developer details, see the [Developer README](README_DEV.md).
 
 ## Install / Run
 
+### Option A: The Binding of Merlot (Spotlight-friendly)
+
+1. In the unzipped folder, run `build_merlot.sh` in Terminal:
+   ```bash
+   ./build_merlot.sh
+   ```
+2. Drag `The Binding of Merlot.app` to `/Applications` (or `~/Applications`).
+3. Launch from Spotlight, Launchpad, or Finder.
+4. If macOS blocks it, right-click the app -> `Open` -> confirm `Open`.
+5. Keep the Terminal window open while the game is running. Close Terminal only after you exit.
+
+### Option B: run.command (direct)
+
 1. In Finder, locate the unzipped folder.
 2. Double-click `run.command`.
 3. If macOS blocks it, right-click `run.command` -> `Open` -> confirm `Open`.

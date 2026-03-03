@@ -1,6 +1,6 @@
 # Developer README
 
-This file documents implementation details for `run.command` and `uninstall.command`.
+This file documents implementation details for `run.command`, `uninstall.command`, and the `.app` bundles.
 
 ## Source
 
@@ -85,6 +85,46 @@ Notes:
 
 - If Wine/DXMT/Steam are already present in the expected locations, `run.command` skips those steps.
 - The scripts do not change macOS system settings (pointer acceleration, polling rate, etc.).
+- `SCRIPT_DIR` can be overridden via environment variable. When run inside the `.app` bundle, the launcher sets it to the directory containing the `.app` so the WINEPREFIX alias symlink lands next to the app instead of inside it.
 - Tested on:
   - Apple M1 Max (32GB), macOS Sequoia 15.7.4
   - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
+
+## The Binding of Merlot
+
+`build_merlot.sh` assembles a macOS `.app` bundle that launches The Binding of Isaac: Rebirth through Steam in Wine.
+
+### Structure
+
+```
+The Binding of Merlot.app/
+  Contents/
+    Info.plist                 # App metadata (Spotlight, Finder, Dock)
+    MacOS/
+      BindingOfMerlot          # Launcher: opens Terminal and runs run.command with STEAM_GAME_ID=250900
+    Resources/
+      run.command              # Copied from repo root at build time
+      AppIcon.icns             # Wine glass + tears icon
+```
+
+### How it works
+
+1. `build_merlot.sh` copies `app/merlot/Info.plist`, `app/merlot/BindingOfMerlot` (launcher), `app/merlot/AppIcon.icns`, and `run.command` into the `.app` directory structure.
+2. When launched, `Contents/MacOS/BindingOfMerlot` uses `osascript` to open a Terminal window and run the embedded `run.command` with `STEAM_GAME_ID=250900`.
+3. `run.command` sets up Wine/DXMT/Steam as usual, then launches Isaac directly via `steam.exe -applaunch 250900`.
+4. The launcher exports `SCRIPT_DIR` pointing to the directory containing the `.app`, so the WINEPREFIX alias symlink is created next to the app (not buried inside it).
+
+### Build
+
+```bash
+./build_merlot.sh
+```
+
+Then drag `The Binding of Merlot.app` to `/Applications` or `~/Applications`.
+
+### Source files
+
+- `app/merlot/Info.plist` — plist template
+- `app/merlot/BindingOfMerlot` — launcher script (opens Terminal + runs `run.command` with game ID)
+- `app/merlot/AppIcon.icns` — app icon
+- `build_merlot.sh` — assembles the `.app` bundle
