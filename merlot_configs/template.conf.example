@@ -1,0 +1,18 @@
+# Copy this file to merlot_configs/<your-game>.conf and adjust the values.
+# Only *.conf files are built by build_merlot.sh. This *.example file is ignored.
+
+APP_NAME="Example Game (Merlot)"
+BUNDLE_ID="com.merlot.example-game"
+
+# Optional overrides.
+# ICON_PATH="path/to/custom-icon.icns"  # Default is "app/merlot/AppIcon.icns"
+# APP_VERSION="1.0"
+# LS_MINIMUM_SYSTEM_VERSION="11.0"
+
+RUN_ENV_NAMES=(
+  STEAM_GAME_ID
+  DXMT_CONFIG
+)
+
+STEAM_GAME_ID="123456"
+DXMT_CONFIG="d3d11.preferredMaxFrameRate=60;"

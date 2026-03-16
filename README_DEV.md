@@ -1,6 +1,6 @@
 # Developer README
 
-This file documents implementation details for `run.command`, `uninstall.command`, and the `.app` bundles.
+This file documents implementation details for `run.command`, `uninstall.command`, and the Merlot `.app` bundles.
 
 ## Source
 
@@ -29,6 +29,7 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
 - DXMT:
   - downloads and installs into `DXMT_ROOT` (defaults to `~/DXMT`)
   - enables it via `WINEDLLPATH_PREPEND`
+  - defaults `DXMT_LOG_LEVEL` to `error` unless already set by the caller
 - Writes registry values inside the prefix:
   - `HKCU\\Software\\Wine\\Mac Driver\\RetinaMode` controlled by `WINE_RETINA_MODE` (`0`/`1`)
   - Disables Windows mouse acceleration (Enhanced Pointer Precision):
@@ -66,7 +67,7 @@ WINEPREFIX="$HOME/Games/SteamPrefix" WINE_RETINA_MODE=1 ./run.command
 
 ## What `uninstall.command` Removes
 
-Targets are controlled by environment variables (defaults are the values in `uninstall.command`):
+Targets derived from environment variables (defaults are the values in `uninstall.command`):
 
 - `WINE_VERSION`
 - `WINE_ROOT`
@@ -75,9 +76,14 @@ Targets are controlled by environment variables (defaults are the values in `uni
 - `STEAM_SETUP`
 - `WINEPREFIX_ALIAS_NAME`
 
+Additional fixed targets:
+
+- `Merlot Apps` in the repo root, `/Applications`, and `~/Applications`
+
 Notes:
 
 - `uninstall.command` asks for confirmation per item and shows progress as `[X/N]`.
+- `uninstall.command` removes the generated `Merlot Apps` folder instead of tracking individual `.app` names.
 - `uninstall.command` does not remove Rosetta 2.
 - Use the same `WINE_VERSION`/`WINE_ROOT`/`WINEPREFIX` values you used with `run.command` to uninstall the correct locations.
 
@@ -90,29 +96,31 @@ Notes:
   - Apple M1 Max (32GB), macOS Sequoia 15.7.4
   - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
 
-## The Binding of Merlot
+## Merlot App Bundles
 
-`build_merlot.sh` assembles a macOS `.app` bundle that launches The Binding of Isaac: Rebirth through Steam in Wine.
+`build_merlot.sh` assembles a `Merlot Apps/` folder containing one macOS `.app` bundle per config in `merlot_configs/`.
 
 ### Structure
 
 ```
-The Binding of Merlot.app/
-  Contents/
-    Info.plist                 # App metadata (Spotlight, Finder, Dock)
-    MacOS/
-      BindingOfMerlot          # Launcher: opens Terminal and runs run.command with STEAM_GAME_ID=250900
-    Resources/
-      run.command              # Copied from repo root at build time
-      AppIcon.icns             # Wine glass + tears icon
+Merlot Apps/
+  <APP_NAME>.app/
+    Contents/
+      Info.plist               # App metadata (Spotlight, Finder, Dock)
+      MacOS/
+        MerlotLauncher         # Shared launcher for all generated apps
+      Resources/
+        merlot.env             # Runtime env generated from merlot_configs/*.conf
+        run.command            # Copied from repo root at build time
+        AppIcon.icns           # Icon for that app
 ```
 
 ### How it works
 
-1. `build_merlot.sh` copies `app/merlot/Info.plist`, `app/merlot/BindingOfMerlot` (launcher), `app/merlot/AppIcon.icns`, and `run.command` into the `.app` directory structure.
-2. When launched, `Contents/MacOS/BindingOfMerlot` uses `osascript` to open a Terminal window and run the embedded `run.command` with `STEAM_GAME_ID=250900`.
-3. `run.command` sets up Wine/DXMT/Steam as usual, then launches Isaac directly via `steam.exe -applaunch 250900`.
-4. The launcher exports `SCRIPT_DIR` pointing to the directory containing the `.app`, so the WINEPREFIX alias symlink is created next to the app (not buried inside it).
+1. `build_merlot.sh` reads each `merlot_configs/*.conf` file and generates one `.app` bundle per config inside `Merlot Apps/`.
+2. Each bundle uses the shared `app/merlot/MerlotLauncher`, generated `Info.plist`, copied `run.command`, and an app-local `merlot.env`.
+3. `MerlotLauncher` opens Terminal and runs the embedded `run.command` with the environment overrides listed in that app's `merlot.env`.
+4. The launcher exports `SCRIPT_DIR` pointing to the directory containing the `.app`, so the shared `WINEPREFIX` alias symlink lands inside `Merlot Apps/`.
 
 ### Build
 
@@ -120,11 +128,22 @@ The Binding of Merlot.app/
 ./build_merlot.sh
 ```
 
-Then drag `The Binding of Merlot.app` to `/Applications` or `~/Applications`.
+To build only one config:
+
+```bash
+./build_merlot.sh binding-of-isaac
+```
+
+To create a new config, copy the template:
+
+```bash
+cp merlot_configs/template.conf.example merlot_configs/my-game.conf
+```
 
 ### Source files
 
-- `app/merlot/Info.plist` — plist template
-- `app/merlot/BindingOfMerlot` — launcher script (opens Terminal + runs `run.command` with game-specific overrides)
-- `app/merlot/AppIcon.icns` — app icon
-- `build_merlot.sh` — assembles the `.app` bundle
+- `app/merlot/MerlotLauncher` - shared launcher script for generated apps
+- `app/merlot/AppIcon.icns` - app icon
+- `merlot_configs/*.conf` - per-game launcher metadata and `run.command` environment overrides
+- `merlot_configs/template.conf.example` - starting point for new game configs; not built by the script
+- `build_merlot.sh` - assembles the `Merlot Apps/` folder

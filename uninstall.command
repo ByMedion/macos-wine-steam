@@ -9,7 +9,10 @@ WINEPREFIX="${WINEPREFIX:-$HOME/.wine-steam-11}"
 DXMT_ROOT="${DXMT_ROOT:-$HOME/DXMT}"
 STEAM_SETUP="${STEAM_SETUP:-/tmp/SteamSetup.exe}"
 WINEPREFIX_ALIAS_NAME="${WINEPREFIX_ALIAS_NAME:-WINEPREFIX}"
-TOTAL_STEPS=5
+MERLOT_APPS_DIR_NAME="Merlot Apps"
+SYSTEM_APPLICATIONS_DIR="/Applications"
+USER_APPLICATIONS_DIR="${HOME}/Applications"
+TOTAL_STEPS=8
 CURRENT_STEP=0
 
 log() {
@@ -67,8 +70,8 @@ remove_dir() {
   echo "$(step_prefix) Not found: ${path}"
 }
 
-remove_alias() {
-  local path="${SCRIPT_DIR}/${WINEPREFIX_ALIAS_NAME}"
+remove_alias_path() {
+  local path="$1"
   CURRENT_STEP=$((CURRENT_STEP + 1))
 
   if [[ -L "${path}" ]]; then
@@ -93,13 +96,19 @@ main() {
   log "Uninstall targets detected"
   echo "1. STEAM_SETUP: ${STEAM_SETUP}"
   echo "2. WINEPREFIX alias: ${SCRIPT_DIR}/${WINEPREFIX_ALIAS_NAME}"
-  echo "3. WINEPREFIX: ${WINEPREFIX}"
-  echo "4. DXMT_ROOT: ${DXMT_ROOT}"
-  echo "5. WINE_ROOT: ${WINE_ROOT}"
+  echo "3. Local Merlot app folder: ${SCRIPT_DIR}/${MERLOT_APPS_DIR_NAME}"
+  echo "4. Installed Merlot app folder: ${SYSTEM_APPLICATIONS_DIR}/${MERLOT_APPS_DIR_NAME}"
+  echo "5. Installed Merlot app folder: ${USER_APPLICATIONS_DIR}/${MERLOT_APPS_DIR_NAME}"
+  echo "6. WINEPREFIX: ${WINEPREFIX}"
+  echo "7. DXMT_ROOT: ${DXMT_ROOT}"
+  echo "8. WINE_ROOT: ${WINE_ROOT}"
 
-  log "Removing artifacts from run.command"
+  log "Removing artifacts from run.command and Merlot app folders"
   remove_file "${STEAM_SETUP}" "Steam installer file"
-  remove_alias
+  remove_alias_path "${SCRIPT_DIR}/${WINEPREFIX_ALIAS_NAME}"
+  remove_dir "${SCRIPT_DIR}/${MERLOT_APPS_DIR_NAME}" "Local Merlot app folder"
+  remove_dir "${SYSTEM_APPLICATIONS_DIR}/${MERLOT_APPS_DIR_NAME}" "Installed Merlot app folder"
+  remove_dir "${USER_APPLICATIONS_DIR}/${MERLOT_APPS_DIR_NAME}" "Installed Merlot app folder"
   remove_dir "${WINEPREFIX}" "Wine prefix directory"
   remove_dir "${DXMT_ROOT}" "DXMT directory"
   remove_dir "${WINE_ROOT}" "Wine root directory"

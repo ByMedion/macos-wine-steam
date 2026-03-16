@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_PATH="$(cd -- "$(dirname -- "$0")" && pwd)"
+RESOURCES_DIR="$(cd -- "${SCRIPT_PATH}/../Resources" && pwd)"
+APP_BUNDLE="$(cd -- "${SCRIPT_PATH}/../.." && pwd)"
+APP_PARENT="$(dirname "${APP_BUNDLE}")"
+
+RUN_SCRIPT="${RESOURCES_DIR}/run.command"
+MERLOT_ENV="${RESOURCES_DIR}/merlot.env"
+
+display_alert() {
+  local title="$1"
+  local message="$2"
+
+  osascript - "${title}" "${message}" <<'EOF'
+on run argv
+    display alert item 1 of argv message item 2 of argv as critical
+end run
+EOF
+}
+
+shell_escape() {
+  printf '%q' "$1"
+}
+
+if [[ ! -f "${RUN_SCRIPT}" ]]; then
+  display_alert "Merlot Launcher" "run.command not found inside the app bundle."
+  exit 1
+fi
+
+if [[ ! -f "${MERLOT_ENV}" ]]; then
+  display_alert "Merlot Launcher" "merlot.env not found inside the app bundle."
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "${MERLOT_ENV}"
+set +a
+
+: "${APP_NAME:?Missing APP_NAME in merlot.env}"
+
+if ! declare -p RUN_ENV_NAMES >/dev/null 2>&1; then
+  display_alert "${APP_NAME}" "RUN_ENV_NAMES is missing from merlot.env."
+  exit 1
+fi
+
+command_string="export SCRIPT_DIR=$(shell_escape "${APP_PARENT}"); "
+
+if (( ${#RUN_ENV_NAMES[@]} > 0 )); then
+  for env_name in "${RUN_ENV_NAMES[@]}"; do
+    if [[ ! "${env_name}" =~ ^[A-Z][A-Z0-9_]*$ ]]; then
+      display_alert "${APP_NAME}" "Invalid environment variable name in merlot.env: ${env_name}"
+      exit 1
+    fi
+
+    if [[ "${!env_name+x}" != "x" ]]; then
+      display_alert "${APP_NAME}" "Missing ${env_name} in merlot.env."
+      exit 1
+    fi
+
+    command_string+="export ${env_name}=$(shell_escape "${!env_name}"); "
+  done
+fi
+
+command_string+="$(shell_escape "${RUN_SCRIPT}")"
+
+osascript - "${command_string}" <<'EOF'
+on run argv
+    tell application "Terminal"
+        activate
+        do script item 1 of argv
+    end tell
+end run
+EOF

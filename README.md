@@ -9,23 +9,44 @@ For developer details, see the [Developer README](README_DEV.md).
 
 ## Install / Run
 
-### Option A: The Binding of Merlot (Spotlight-friendly)
+### Simple: Spotlight-friendly launchers with game presets
+
+#### Install:
 
 1. In the unzipped folder, run `build_merlot.sh` in Terminal:
    ```bash
    ./build_merlot.sh
    ```
-2. Drag `The Binding of Merlot.app` to `/Applications` (or `~/Applications`).
-3. Launch from Spotlight, Launchpad, or Finder.
-4. If macOS blocks it, right-click the app -> `Open` -> confirm `Open`.
-5. Keep the Terminal window open while the game is running. Close Terminal only after you exit.
+2. Open the generated `Merlot Apps` folder.
+3. Drag the whole `Merlot Apps` folder to `/Applications` (or `~/Applications`).
 
-### Option B: run.command (direct)
+#### Run:
+
+1. Open one of the apps:
+   - `Steam (Merlot).app` to launch Steam without game-specific presets.
+   - A game launcher, for example `Binding of Isaac.app`, to use presets optimized for that game.
+2. If macOS blocks it, right-click the app -> `Open` -> confirm `Open`.
+3. Keep the Terminal window open while the game is running. Close Terminal only after you exit.
+
+This folder includes `Steam (Merlot).app`, which starts Steam, plus ready-made launchers for games already included in this repository.
+Each game launcher includes presets and tweaks optimized for that game.
+If you want, you can also add your own config in `merlot_configs/` and run `build_merlot.sh` again to create another launcher.
+
+What to expect:
+- You may be asked for your macOS password (to install Rosetta if it is missing).
+- First run can take a while because it downloads Wine, DXMT, and Steam installer.
+- At the end, Steam should launch inside Wine.
+
+### Advanced: Generic Steam launcher
 
 1. In Finder, locate the unzipped folder.
 2. Double-click `run.command`.
 3. If macOS blocks it, right-click `run.command` -> `Open` -> confirm `Open`.
 4. Keep the Terminal window open while Steam is running. Close Terminal only after you exit Steam.
+
+Use this option when you want the general Steam-in-Wine setup instead of a launcher tailored to a specific game.
+
+If you are familiar with Terminal and bash, you can also customize launch options described in the [Developer README](README_DEV.md).
 
 What to expect:
 - You may be asked for your macOS password (to install Rosetta if it is missing).
