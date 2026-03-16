@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# The Binding of Merlot — launches Binding of Isaac: Rebirth through Steam in Wine
+
+SCRIPT_PATH="$(cd -- "$(dirname -- "$0")" && pwd)"
+RESOURCES_DIR="$(cd -- "${SCRIPT_PATH}/../Resources" && pwd)"
+APP_BUNDLE="$(cd -- "${SCRIPT_PATH}/../.." && pwd)"
+APP_PARENT="$(dirname "${APP_BUNDLE}")"
+
+RUN_SCRIPT="${RESOURCES_DIR}/run.command"
+
+if [[ ! -f "${RUN_SCRIPT}" ]]; then
+  osascript -e 'display alert "The Binding of Merlot" message "run.command not found inside the app bundle." as critical'
+  exit 1
+fi
+
+# Open Terminal and run the embedded script with Isaac's Steam game ID.
+# SCRIPT_DIR is exported so the WINEPREFIX alias lands next to the .app.
+# STEAM_GAME_ID=250900 is The Binding of Isaac: Rebirth.
+osascript <<EOF
+tell application "Terminal"
+    activate
+    do script "export SCRIPT_DIR='${APP_PARENT}'; export STEAM_GAME_ID=250900; '${RUN_SCRIPT}'"
+end tell
+EOF

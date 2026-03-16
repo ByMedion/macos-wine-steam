@@ -9,6 +9,19 @@ For developer details, see the [Developer README](README_DEV.md).
 
 ## Install / Run
 
+### Option A: The Binding of Merlot (Spotlight-friendly)
+
+1. In the unzipped folder, run `build_merlot.sh` in Terminal:
+   ```bash
+   ./build_merlot.sh
+   ```
+2. Drag `The Binding of Merlot.app` to `/Applications` (or `~/Applications`).
+3. Launch from Spotlight, Launchpad, or Finder.
+4. If macOS blocks it, right-click the app -> `Open` -> confirm `Open`.
+5. Keep the Terminal window open while the game is running. Close Terminal only after you exit.
+
+### Option B: run.command (direct)
+
 1. In Finder, locate the unzipped folder.
 2. Double-click `run.command`.
 3. If macOS blocks it, right-click `run.command` -> `Open` -> confirm `Open`.
@@ -36,7 +49,9 @@ If Steam is running, follow the steps in "Stop" first.
 ## Notes
 
 - Apple Silicon only. Intel Macs are not supported by this script.
-- Tested on Apple M1 Max (32GB), macOS Sequoia 15.7.4.
+- Tested on:
+  - Apple M1 Max (32GB), macOS Sequoia 15.7.4
+  - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
 - Inspired by this Reddit post:
   https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/
 
