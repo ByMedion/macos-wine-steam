@@ -1,5 +1,5 @@
 # Copy this file to merlot_configs/<your-game>.conf and adjust the values.
-# Only *.conf files are built by build_merlot.sh. This *.example file is ignored.
+# Only *.conf files are built by install_merlot.command. This *.example file is ignored.
 
 APP_NAME="Example Game (Merlot)"
 BUNDLE_ID="com.merlot.example-game"

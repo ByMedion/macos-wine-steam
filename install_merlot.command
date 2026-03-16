@@ -4,7 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_DIR="${SCRIPT_DIR}/app/merlot"
 CONFIGS_DIR="${SCRIPT_DIR}/merlot_configs"
-OUTPUT_DIR="${SCRIPT_DIR}/Merlot Apps"
+INSTALL_ROOT="/Applications"
+INSTALL_DIR="${INSTALL_ROOT}/Merlot Apps"
 DEFAULT_ICON_PATH="${SCRIPT_DIR}/app/merlot/AppIcon.icns"
 LAUNCHER_TEMPLATE="${TEMPLATE_DIR}/MerlotLauncher"
 LAUNCHER_NAME="MerlotLauncher"
@@ -16,6 +17,11 @@ log() {
 die() {
   printf "Error: %s\n" "$1" >&2
   exit 1
+}
+
+ensure_sudo_ready() {
+  log "Preparing sudo session (needed to install into /Applications)"
+  sudo -v
 }
 
 resolve_path() {
@@ -140,6 +146,7 @@ build_from_config() (
   set -euo pipefail
 
   local config_path="$1"
+  local output_dir="$2"
   local config_dir
   config_dir="$(cd -- "$(dirname -- "${config_path}")" && pwd)"
 
@@ -160,7 +167,7 @@ build_from_config() (
   local icon_source
   icon_source="$(resolve_path "${ICON_PATH}" "${config_dir}")"
 
-  local build_dir="${OUTPUT_DIR}/${APP_NAME}.app"
+  local build_dir="${output_dir}/${APP_NAME}.app"
 
   log "Building ${APP_NAME}.app"
 
@@ -187,6 +194,8 @@ build_from_config() (
 )
 
 main() {
+  local temp_root=""
+  local output_dir=""
   local -a config_paths=()
   local config_path
 
@@ -196,20 +205,24 @@ main() {
 
   (( ${#config_paths[@]} > 0 )) || die "No configs selected"
 
-  if (( $# == 0 )) && [[ -d "${OUTPUT_DIR}" ]]; then
-    log "Removing previous build folder"
-    rm -rf "${OUTPUT_DIR}"
-  fi
+  ensure_sudo_ready
+  temp_root="$(mktemp -d /tmp/merlot-apps.XXXXXX)"
+  output_dir="${temp_root}/Merlot Apps"
+  mkdir -p "${output_dir}"
 
-  mkdir -p "${OUTPUT_DIR}"
+  trap 'if [[ -n "${temp_root:-}" ]]; then rm -rf "${temp_root}"; fi' EXIT
 
   for config_path in "${config_paths[@]}"; do
-    build_from_config "${config_path}"
+    build_from_config "${config_path}" "${output_dir}"
   done
 
-  log "Built app folder: ${OUTPUT_DIR}"
+  log "Installing to ${INSTALL_DIR}"
+  sudo rm -rf "${INSTALL_DIR}"
+  sudo mkdir -p "${INSTALL_ROOT}"
+  sudo cp -R "${output_dir}" "${INSTALL_ROOT}/"
+
+  log "Installed app folder: ${INSTALL_DIR}"
   echo ""
-  echo "Install by dragging 'Merlot Apps' to /Applications (or ~/Applications)."
-  echo "Then launch any app inside that folder from Finder or Spotlight."
+  echo "Launch any app inside '/Applications/Merlot Apps' from Finder, Launchpad, or Spotlight."
 }
 main "$@"

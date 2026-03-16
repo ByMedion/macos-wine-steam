@@ -78,14 +78,14 @@ Targets derived from environment variables (defaults are the values in `uninstal
 - `STEAM_SETUP`
 - `WINEPREFIX_ALIAS_NAME`
 
-Additional fixed targets:
+Additional hardcoded target:
 
-- `Merlot Apps` in the repo root, `/Applications`, and `~/Applications`
+- `/Applications/Merlot Apps`
 
 Notes:
 
 - `uninstall.command` asks for confirmation per item and shows progress as `[X/N]`.
-- `uninstall.command` removes the generated `Merlot Apps` folder instead of tracking individual `.app` names.
+- `uninstall.command` uses `sudo` to remove `/Applications/Merlot Apps`.
 - `uninstall.command` does not remove Rosetta 2.
 - Use the same `WINE_VERSION`/`WINE_ROOT`/`WINEPREFIX` values you used with `run.command` to uninstall the correct locations.
 
@@ -93,14 +93,14 @@ Notes:
 
 - If Wine/DXMT/Steam are already present in the expected locations, `run.command` skips those steps.
 - The scripts do not change macOS system settings (pointer acceleration, polling rate, etc.).
-- `SCRIPT_DIR` can be overridden via environment variable. When run inside the `.app` bundle, the launcher sets it to the directory containing the `.app` so the WINEPREFIX alias symlink lands next to the app instead of inside it.
+- `SCRIPT_DIR` can be overridden via environment variable. When run inside the `.app` bundle, the launcher sets it to the directory containing the `.app` so the WINEPREFIX alias symlink lands next to the app bundle inside `Merlot Apps/`.
 - Tested on:
   - Apple M1 Max (32GB), macOS Sequoia 15.7.4
   - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
 
 ## Merlot App Bundles
 
-`build_merlot.sh` assembles a `Merlot Apps/` folder containing one macOS `.app` bundle per config in `merlot_configs/`.
+`install_merlot.command` assembles `Merlot Apps/` in a temporary directory, then installs it into `/Applications/Merlot Apps`.
 
 ### Structure
 
@@ -113,27 +113,28 @@ Merlot Apps/
         MerlotLauncher         # Shared launcher for all generated apps
       Resources/
         merlot.env             # Runtime env generated from merlot_configs/*.conf
-        run.command            # Copied from repo root at build time
+        run.command            # Copied from repo root at install time
         AppIcon.icns           # Icon for that app
 ```
 
 ### How it works
 
-1. `build_merlot.sh` reads each `merlot_configs/*.conf` file and generates one `.app` bundle per config inside `Merlot Apps/`.
-2. Each bundle uses the shared `app/merlot/MerlotLauncher`, generated `Info.plist`, copied `run.command`, and an app-local `merlot.env`.
-3. `MerlotLauncher` opens Terminal and runs the embedded `run.command` with the environment overrides listed in that app's `merlot.env`.
-4. The launcher exports `SCRIPT_DIR` pointing to the directory containing the `.app`, so the shared `WINEPREFIX` alias symlink lands inside `Merlot Apps/`.
+1. `install_merlot.command` reads each `merlot_configs/*.conf` file and generates one `.app` bundle per config inside `Merlot Apps/` in a temporary directory.
+2. It asks for `sudo`, replaces `/Applications/Merlot Apps`, and copies the freshly generated folder there.
+3. Each bundle uses the shared `app/merlot/MerlotLauncher`, generated `Info.plist`, copied `run.command`, and an app-local `merlot.env`.
+4. `MerlotLauncher` opens Terminal and runs the embedded `run.command` with the environment overrides listed in that app's `merlot.env`.
+5. The launcher exports `SCRIPT_DIR` pointing to the directory containing the `.app`, so the shared `WINEPREFIX` alias symlink lands in `/Applications/Merlot Apps/`.
 
-### Build
+### Install
 
 ```bash
-./build_merlot.sh
+./install_merlot.command
 ```
 
-To build only one config:
+To install only one config:
 
 ```bash
-./build_merlot.sh binding-of-isaac
+./install_merlot.command binding-of-isaac
 ```
 
 To create a new config, copy the template:
@@ -148,4 +149,4 @@ cp merlot_configs/template.conf.example merlot_configs/my-game.conf
 - `app/merlot/AppIcon.icns` - app icon
 - `merlot_configs/*.conf` - per-game launcher metadata and `run.command` environment overrides
 - `merlot_configs/template.conf.example` - starting point for new game configs; not built by the script
-- `build_merlot.sh` - assembles the `Merlot Apps/` folder
+- `install_merlot.command` - assembles and installs the `Merlot Apps/` folder

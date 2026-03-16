@@ -22,28 +22,27 @@ For developer details, see the [Developer README](README_DEV.md).
 
 #### Install:
 
-1. In the unzipped folder, run `build_merlot.sh` in Terminal:
-   ```bash
-   ./build_merlot.sh
-   ```
-2. Open the generated `Merlot Apps` folder.
-3. Drag the whole `Merlot Apps` folder to `/Applications` (or `~/Applications`).
+1. In Finder, locate the unzipped folder.
+2. Double-click `install_merlot.command`.
+3. If macOS blocks it, right-click `install_merlot.command` -> `Open` -> confirm `Open`.
+4. It installs `Merlot Apps` into `/Applications`.
 
 #### Run:
 
-1. Open one of the apps:
+1. Open one of the apps in `/Applications/Merlot Apps`, or find it in Spotlight:
    - `Steam (Merlot).app` to launch Steam without game-specific presets.
-   - A game launcher, for example `Binding of Isaac.app`, to use presets optimized for that game.
+   - A game launcher, for example `Binding of Isaac (Merlot).app`, to use presets optimized for that game.
 2. If macOS blocks it, right-click the app -> `Open` -> confirm `Open`.
 3. Keep the Terminal window open while the game is running. Close Terminal only after you exit.
 
-This folder includes `Steam (Merlot).app`, which starts Steam, plus ready-made launchers for games already included in this repository.
+`Merlot Apps` includes `Steam (Merlot).app` plus ready-made launchers for supported games in this repository.
 Each game launcher includes presets and tweaks optimized for that game.
-If you want, you can also add your own config in `merlot_configs/` and run `build_merlot.sh` again to create another launcher.
+If you want, you can also add your own config in `merlot_configs/` and run `install_merlot.command` again to create another launcher. See the [Developer README](README_DEV.md).
 
 What to expect:
-- You may be asked for your macOS password (to install Rosetta if it is missing).
-- First run can take a while because it downloads Wine, DXMT, and Steam installer.
+- `install_merlot.command` may ask for your macOS password to install `Merlot Apps` into `/Applications`.
+- The first time you launch a Merlot app, you may be asked for your macOS password (to install Rosetta if it is missing).
+- The first launch can take a while because it downloads Wine, DXMT, and Steam installer.
 - At the end, Steam should launch inside Wine.
 
 ### Advanced: Generic Steam launcher
@@ -58,8 +57,8 @@ Use this option when you want the general Steam-in-Wine setup instead of a launc
 If you are familiar with Terminal and bash, you can also customize launch options described in the [Developer README](README_DEV.md).
 
 What to expect:
-- You may be asked for your macOS password (to install Rosetta if it is missing).
-- First run can take a while because it downloads Wine, DXMT, and Steam installer.
+- The first time you run `run.command`, you may be asked for your macOS password (to install Rosetta if it is missing).
+- The first launch can take a while because it downloads Wine, DXMT, and Steam installer.
 - At the end, Steam should launch inside Wine.
 
 ## Stop
@@ -74,7 +73,8 @@ If Steam is running, follow the steps in "Stop" first.
 
 1. Double-click `uninstall.command`.
 2. If macOS blocks it, right-click `uninstall.command` -> `Open` -> confirm `Open`.
-3. It will ask for confirmation for each item it wants to remove. Type `y` to remove it, or `n` to skip it (if you want to keep something).
+3. It may ask for your macOS password to remove `/Applications/Merlot Apps`.
+4. It will ask for confirmation for each item it wants to remove. Type `y` to remove it, or `n` to skip it (if you want to keep something).
 
 ## Notes
 
