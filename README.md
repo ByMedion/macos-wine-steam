@@ -2,6 +2,15 @@
 
 For developer details, see the [Developer README](README_DEV.md).
 
+## References & Credits
+
+- Inspired by this Reddit post:
+  [How to play Windows Steam games on Mac with M...](https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/)
+- Wine builds used by this project:
+  [Gcenx/macOS_Wine_builds](https://github.com/Gcenx/macOS_Wine_builds)
+- Reddit post about this project:
+  [One-click solution to run Windows games on Apple...](https://www.reddit.com/r/macgaming/comments/1rflhp8/oneclick_solution_to_run_windows_games_on_apple/)
+
 ## Download
 
 1. Click the green button `Code`, then `Download ZIP`.
@@ -73,8 +82,6 @@ If Steam is running, follow the steps in "Stop" first.
 - Tested on:
   - Apple M1 Max (32GB), macOS Sequoia 15.7.4
   - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
-- Inspired by this Reddit post:
-  https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_games_on_mac_with_m/
 
 ## What The Scripts Do (Short)
 
