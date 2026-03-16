@@ -244,11 +244,6 @@ enable_dxmt_env() {
     *":${DXMT_ROOT}:"*) ;;
     *) WINEDLLPATH_PREPEND="${DXMT_ROOT}${WINEDLLPATH_PREPEND:+:${WINEDLLPATH_PREPEND}}" ;;
   esac
-
-  # TODO: These DXMT defaults are tuned for testing (Binding of Isaac).
-  # Replace with a config-file approach or remove before upstreaming.
-  export DXMT_CONFIG="${DXMT_CONFIG:-d3d11.preferredMaxFrameRate=60;}"
-  export DXMT_LOG_LEVEL="${DXMT_LOG_LEVEL:-none}"
 }
 
 launch_steam() {

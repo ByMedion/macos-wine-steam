@@ -125,6 +125,6 @@ Then drag `The Binding of Merlot.app` to `/Applications` or `~/Applications`.
 ### Source files
 
 - `app/merlot/Info.plist` — plist template
-- `app/merlot/BindingOfMerlot` — launcher script (opens Terminal + runs `run.command` with game ID)
+- `app/merlot/BindingOfMerlot` — launcher script (opens Terminal + runs `run.command` with game-specific overrides)
 - `app/merlot/AppIcon.icns` — app icon
 - `build_merlot.sh` — assembles the `.app` bundle

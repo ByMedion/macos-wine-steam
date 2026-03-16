@@ -13,12 +13,12 @@ if [[ ! -f "${RUN_SCRIPT}" ]]; then
   exit 1
 fi
 
-# Open Terminal and run the embedded script with Isaac's Steam game ID.
+# Open Terminal and run the embedded script with Isaac-specific overrides.
 # SCRIPT_DIR is exported so the WINEPREFIX alias lands next to the .app.
 # STEAM_GAME_ID=250900 is The Binding of Isaac: Rebirth.
 osascript <<EOF
 tell application "Terminal"
     activate
-    do script "export SCRIPT_DIR='${APP_PARENT}'; export STEAM_GAME_ID=250900; '${RUN_SCRIPT}'"
+    do script "export SCRIPT_DIR='${APP_PARENT}'; export STEAM_GAME_ID=250900; export DXMT_CONFIG='d3d11.preferredMaxFrameRate=60;'; export DXMT_LOG_LEVEL=none; '${RUN_SCRIPT}'"
 end tell
 EOF
