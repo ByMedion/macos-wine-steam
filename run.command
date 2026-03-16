@@ -244,6 +244,9 @@ enable_dxmt_env() {
     *":${DXMT_ROOT}:"*) ;;
     *) WINEDLLPATH_PREPEND="${DXMT_ROOT}${WINEDLLPATH_PREPEND:+:${WINEDLLPATH_PREPEND}}" ;;
   esac
+
+  export DXMT_LOG_LEVEL="${DXMT_LOG_LEVEL:-error}"
+  export WINEDEBUG="${WINEDEBUG:--all,err+all}"
 }
 
 launch_steam() {
