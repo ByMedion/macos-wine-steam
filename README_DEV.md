@@ -30,6 +30,8 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
   - downloads and installs into `DXMT_ROOT` (defaults to `~/DXMT`)
   - enables it via `WINEDLLPATH_PREPEND`
   - defaults `DXMT_LOG_LEVEL` to `error` unless already set by the caller
+- Wine logging:
+  - defaults `WINEDEBUG` to `-all,err+all` unless already set by the caller
 - Writes registry values inside the prefix:
   - `HKCU\\Software\\Wine\\Mac Driver\\RetinaMode` controlled by `WINE_RETINA_MODE` (`0`/`1`)
   - Disables Windows mouse acceleration (Enhanced Pointer Precision):
