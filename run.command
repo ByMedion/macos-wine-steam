@@ -71,6 +71,8 @@ ensure_wine_installed() {
 ensure_wineprefix_alias() {
   log "Ensuring local alias to WINEPREFIX"
   local alias_path="${SCRIPT_DIR}/${WINEPREFIX_ALIAS_NAME}"
+  local alias_dir
+  alias_dir="$(dirname "${alias_path}")"
 
   if [[ -e "${alias_path}" && ! -L "${alias_path}" ]]; then
     echo "Path exists and is not a symlink: ${alias_path}. Skipping alias creation."
@@ -86,7 +88,21 @@ ensure_wineprefix_alias() {
     fi
   fi
 
-  ln -sfn "${WINEPREFIX}" "${alias_path}"
+  if [[ ! -d "${alias_dir}" ]]; then
+    echo "Alias directory does not exist: ${alias_dir}. Skipping alias creation."
+    return
+  fi
+
+  if [[ ! -w "${alias_dir}" ]]; then
+    echo "Alias directory is not writable: ${alias_dir}. Skipping alias creation."
+    return
+  fi
+
+  if ! ln -sfn "${WINEPREFIX}" "${alias_path}"; then
+    echo "Could not create alias at ${alias_path}. Continuing without it."
+    return
+  fi
+
   echo "Alias created: ${alias_path} -> ${WINEPREFIX}"
 }
 

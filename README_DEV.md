@@ -93,7 +93,8 @@ Notes:
 
 - If Wine/DXMT/Steam are already present in the expected locations, `run.command` skips those steps.
 - The scripts do not change macOS system settings (pointer acceleration, polling rate, etc.).
-- `SCRIPT_DIR` can be overridden via environment variable. When run inside the `.app` bundle, the launcher sets it to the directory containing the `.app` so the WINEPREFIX alias symlink lands next to the app bundle inside `Merlot Apps/`.
+- `SCRIPT_DIR` can be overridden via environment variable. When run inside the `.app` bundle, the launcher sets it to the directory containing the `.app` so the `WINEPREFIX` alias symlink lands next to the app bundle inside `Merlot Apps/`.
+  - Alias creation is best-effort only. If `SCRIPT_DIR` is not writable (for example, `/Applications/Merlot Apps` after a sudo install), `run.command` skips the symlink and continues.
 - Tested on:
   - Apple M1 Max (32GB), macOS Sequoia 15.7.4
   - Apple M2 Pro (16GB), macOS Sequoia 15.7.4
