@@ -56,9 +56,10 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
 Defaults are the values in `run.command`.
 
 - `WINE_VERSION`
-  - Wine build version to download (default: `11.3`)
+  - Wine build version to download (default: `11.6_1`)
+  - Must exist as a `wine-staging-${WINE_VERSION}-osx64.tar.xz` asset in the [Gcenx macOS Wine builds](https://github.com/Gcenx/macOS_Wine_builds/releases). Gcenx prunes older releases periodically, so this default will need bumping over time.
 - `DXMT_VERSION`
-  - DXMT release version to download (default: `0.73`)
+  - DXMT release version to download (default: `0.74`)
 - `WINE_ROOT`
   - Where Wine is extracted (default: `~/wine-$WINE_VERSION`)
 - `WINEPREFIX`
