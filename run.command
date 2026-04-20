@@ -13,6 +13,14 @@ WINE_BIN="${WINE_APP}/Contents/Resources/wine/bin/wine"
 WINEPREFIX="${WINEPREFIX:-$HOME/.wine-steam-11}"
 STEAM_SETUP="/tmp/SteamSetup.exe"
 DXMT_ROOT="${DXMT_ROOT:-$HOME/DXMT}"
+# GPTK_PATH: optional. When set, the D3D translation backend switches from
+# DXMT (default) to Apple's Game Porting Toolkit (D3DMetal). Point this at
+# either the GPTK root directory or the folder that contains the .dll files
+# (we probe a few common layouts). GPTK is NOT downloaded automatically --
+# Apple's EULA forbids redistribution, so the user must obtain it from
+# developer.apple.com themselves. DXMT is the default precisely because it
+# has no such constraint.
+GPTK_PATH="${GPTK_PATH:-}"
 WINEPREFIX_ALIAS_NAME="${WINEPREFIX_ALIAS_NAME:-WINEPREFIX}"
 WINE_RETINA_MODE="${WINE_RETINA_MODE:-0}" # 1=enable RetinaMode, 0=disable RetinaMode (Default)
 # 1=detach Steam from the Terminal after launch so closing the window doesn't kill it (Default).
@@ -269,6 +277,59 @@ enable_dxmt_env() {
   export WINEDEBUG="${WINEDEBUG:--all,err+all}"
 }
 
+use_gptk() {
+  [[ -n "${GPTK_PATH}" ]]
+}
+
+find_gptk_dll_dir() {
+  local root="$1"
+  local candidates=(
+    "${root}"
+    "${root}/redist/lib/external"
+    "${root}/lib/external"
+    "${root}/lib"
+    "${root}/Libraries"
+  )
+  local c
+  for c in "${candidates[@]}"; do
+    if [[ -f "${c}/d3d11.dll" ]]; then
+      printf '%s\n' "${c}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+ensure_gptk_installed() {
+  log "Installing GPTK DLLs into the Wine prefix"
+  [[ -d "${GPTK_PATH}" ]] || die "GPTK_PATH is not a directory: ${GPTK_PATH}"
+
+  local src
+  if ! src="$(find_gptk_dll_dir "${GPTK_PATH}")"; then
+    die "Could not find d3d11.dll under GPTK_PATH=${GPTK_PATH}. Obtain the Game Porting Toolkit from developer.apple.com and point GPTK_PATH at the root (or directly at the folder containing the DLLs)."
+  fi
+
+  local target="${WINEPREFIX}/drive_c/windows/system32"
+  [[ -d "${target}" ]] || die "Prefix system32 not found (is the prefix initialized?): ${target}"
+
+  echo "Copying GPTK DLLs from ${src} to ${target}"
+  local f copied=0
+  for f in "${src}"/*.dll; do
+    [[ -f "${f}" ]] || continue
+    cp -f "${f}" "${target}/"
+    copied=$((copied + 1))
+  done
+  [[ "${copied}" -gt 0 ]] || die "No .dll files found in ${src}"
+  echo "Copied ${copied} DLL(s)."
+}
+
+enable_gptk_env() {
+  log "Enabling GPTK via WINEDLLOVERRIDES"
+  export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-d3d9,d3d10core,d3d11,d3d12,d3d12core,dxgi=n}"
+  export WINEDEBUG="${WINEDEBUG:--all,err+all}"
+  echo "WINEDLLOVERRIDES=${WINEDLLOVERRIDES}"
+}
+
 launch_steam() {
   log "Launching Steam"
   local steam_exe
@@ -310,8 +371,13 @@ main() {
   ensure_wine_retina_mode "${WINE_RETINA_MODE}"
   ensure_wine_windows_mouse_accel_disabled
   ensure_steam_installed
-  ensure_dxmt_installed
-  enable_dxmt_env
+  if use_gptk; then
+    ensure_gptk_installed
+    enable_gptk_env
+  else
+    ensure_dxmt_installed
+    enable_dxmt_env
+  fi
   launch_steam
 }
 
