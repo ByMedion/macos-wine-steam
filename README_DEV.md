@@ -46,7 +46,7 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
 Defaults are the values in `run.command`.
 
 - `WINE_VERSION`
-  - Wine build version to download (default: `11.3`)
+  - Wine build version to download (default: `11.6_1`)
 - `DXMT_VERSION`
   - DXMT release version to download (default: `0.73`)
 - `WINE_ROOT`
