@@ -15,6 +15,10 @@ STEAM_SETUP="/tmp/SteamSetup.exe"
 DXMT_ROOT="${DXMT_ROOT:-$HOME/DXMT}"
 WINEPREFIX_ALIAS_NAME="${WINEPREFIX_ALIAS_NAME:-WINEPREFIX}"
 WINE_RETINA_MODE="${WINE_RETINA_MODE:-0}" # 1=enable RetinaMode, 0=disable RetinaMode (Default)
+# 1=detach Steam from the Terminal after launch so closing the window doesn't kill it (Default).
+# 0=keep the original foreground behavior (Terminal window must stay open).
+MERLOT_DETACH="${MERLOT_DETACH:-1}"
+MERLOT_STEAM_LOG="${MERLOT_STEAM_LOG:-${TMPDIR:-/tmp}/merlot-steam.log}"
 # Default before we added this: the value is not set in registry (Wine internal default).
 # Set to force|enable|disable to override, or leave empty to keep default.
 WINE_MOUSE_WARP_OVERRIDE="${WINE_MOUSE_WARP_OVERRIDE:-}"
@@ -271,12 +275,28 @@ launch_steam() {
   steam_exe="$(find_steam_exe || true)"
   [[ -n "${steam_exe}" ]] || die "steam.exe not found."
 
+  local -a steam_cmd=("${WINE_BIN}" "${steam_exe}")
   if [[ -n "${STEAM_GAME_ID:-}" ]]; then
     echo "Launching Steam game ${STEAM_GAME_ID}..."
-    "${WINE_BIN}" "${steam_exe}" -applaunch "${STEAM_GAME_ID}"
-  else
-    "${WINE_BIN}" "${steam_exe}"
+    steam_cmd+=(-applaunch "${STEAM_GAME_ID}")
   fi
+
+  case "${MERLOT_DETACH}" in
+    0)
+      "${steam_cmd[@]}"
+      ;;
+    1)
+      log "Detaching Steam from this Terminal (log: ${MERLOT_STEAM_LOG})"
+      : >"${MERLOT_STEAM_LOG}" || die "Cannot write to ${MERLOT_STEAM_LOG}"
+      nohup "${steam_cmd[@]}" </dev/null >>"${MERLOT_STEAM_LOG}" 2>&1 &
+      disown
+      echo "Steam is running in the background (PID $!). Safe to close this Terminal window."
+      echo "Tail the log with: tail -f ${MERLOT_STEAM_LOG}"
+      ;;
+    *)
+      die "MERLOT_DETACH must be 0 or 1."
+      ;;
+  esac
 }
 
 main() {

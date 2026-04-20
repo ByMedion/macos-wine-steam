@@ -33,7 +33,7 @@ For developer details, see the [Developer README](README_DEV.md).
    - `Steam (Merlot).app` to launch Steam without game-specific presets.
    - A game launcher, for example `Binding of Isaac (Merlot).app`, to use settings optimized for that game.
 2. If macOS blocks it, right-click the app -> `Open` -> confirm `Open`.
-3. Keep the Terminal window open while Steam is running. Do not close the Terminal window, or Steam and any running game will close immediately.
+3. After Steam launches, the Terminal window prints the Steam log path and can be closed. Steam stays running in the background. (Set `MERLOT_DETACH=0` if you prefer the old foreground behavior where closing Terminal kills Steam.)
 
 `Merlot Apps` includes `Steam (Merlot).app` plus ready-made launchers for supported games in this repository.
 Each game launcher includes presets and tweaks optimized for that game.
@@ -52,7 +52,7 @@ If you want, you can add your own config in `merlot_configs/` and run `install_m
 1. In Finder, locate the unzipped folder.
 2. Double-click `run.command`.
 3. If macOS blocks it, right-click `run.command` -> `Open` -> confirm `Open`.
-4. Keep the Terminal window open while Steam is running. Do not close the Terminal window, or Steam and any running game will close immediately.
+4. After Steam launches, the Terminal window prints the Steam log path and can be closed. Steam stays running in the background. (Set `MERLOT_DETACH=0` if you prefer the old foreground behavior where closing Terminal kills Steam.)
 
 Use this option when you want the general Steam-in-Wine setup instead of a launcher tailored to a specific game.
 
@@ -67,7 +67,7 @@ If you are familiar with Terminal and bash, you can also customize launch option
 
 1. In Steam, use the menu: `Steam` -> `Exit`.
 2. Wait until Steam fully closes.
-3. Close Terminal.
+3. You can close Terminal at any time; with the default `MERLOT_DETACH=1` behavior, Steam is detached from it.
 
 ## Uninstall
 
