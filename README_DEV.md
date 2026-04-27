@@ -26,10 +26,20 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
   - downloads `SteamSetup.exe` into `STEAM_SETUP` (defaults to `/tmp/SteamSetup.exe`)
   - runs the installer via Wine
   - deletes `STEAM_SETUP` after Steam is detected in the prefix
-- DXMT:
-  - downloads and installs into `DXMT_ROOT` (defaults to `~/DXMT`)
-  - enables it via `WINEDLLPATH_PREPEND`
-  - defaults `DXMT_LOG_LEVEL` to `error` unless already set by the caller
+- D3D translation backend (chosen by `GPTK_PATH`):
+  - Default (DXMT):
+    - downloads and installs into `DXMT_ROOT` (defaults to `~/DXMT`)
+    - enables it via `WINEDLLPATH_PREPEND`
+    - defaults `DXMT_LOG_LEVEL` to `error` unless already set by the caller
+  - Opt-in (Apple Game Porting Toolkit / D3DMetal):
+    - activated by setting `GPTK_PATH` to the GPTK root or directly to the folder containing its DLLs
+    - common layouts are probed (`<path>`, `<path>/redist/lib/external`, `<path>/lib/external`, `<path>/lib`, `<path>/Libraries`)
+    - copies the D3DMetal DLLs into `${WINEPREFIX}/drive_c/windows/system32/` and sets `WINEDLLOVERRIDES=d3d9,d3d10core,d3d11,d3d12,d3d12core,dxgi=n` (unless the caller already set `WINEDLLOVERRIDES`)
+    - GPTK is **not** downloaded by this script -- Apple's EULA forbids redistribution, so you must obtain it from developer.apple.com yourself
+    - a dedicated prefix (e.g. `WINEPREFIX=~/.wine-steam-gptk`) is recommended so GPTK and DXMT DLLs do not accumulate in the same prefix
+- Launch mode:
+  - Default (`MERLOT_DETACH=1`) runs Steam with `nohup ... & disown`, redirecting stdout/stderr to `${MERLOT_STEAM_LOG}` (defaults to `${TMPDIR:-/tmp}/merlot-steam.log`). The Terminal window can be closed immediately after launch without killing Steam.
+  - `MERLOT_DETACH=0` preserves the pre-patch foreground behavior (Terminal window must stay open).
 - Wine logging:
   - defaults `WINEDEBUG` to `-all,err+all` unless already set by the caller
 - Writes registry values inside the prefix:
@@ -47,8 +57,9 @@ Defaults are the values in `run.command`.
 
 - `WINE_VERSION`
   - Wine build version to download (default: `11.6_1`)
+  - Must exist as a `wine-staging-${WINE_VERSION}-osx64.tar.xz` asset in the [Gcenx macOS Wine builds](https://github.com/Gcenx/macOS_Wine_builds/releases). Gcenx prunes older releases periodically, so this default will need bumping over time.
 - `DXMT_VERSION`
-  - DXMT release version to download (default: `0.73`)
+  - DXMT release version to download (default: `0.74`)
 - `WINE_ROOT`
   - Where Wine is extracted (default: `~/wine-$WINE_VERSION`)
 - `WINEPREFIX`
@@ -60,11 +71,27 @@ Defaults are the values in `run.command`.
 - `WINE_MOUSE_WARP_OVERRIDE`
   - Empty keeps Wine default (and removes the key if it was set before)
   - Allowed values: `force`, `enable`, `disable`
+- `GPTK_PATH`
+  - Empty (default) uses DXMT. When set, switches the D3D backend to Apple's Game Porting Toolkit (D3DMetal) and skips the DXMT download.
+  - Point at either the GPTK root directory or the folder containing its DLLs.
+- `MERLOT_DETACH`
+  - `1` (default) detaches Steam from the launching Terminal so the window can be closed without killing Steam.
+  - `0` keeps the old foreground behavior.
+- `MERLOT_STEAM_LOG`
+  - Path to the detached-mode Steam log (default: `${TMPDIR:-/tmp}/merlot-steam.log`).
 
 Example overrides (environment variables):
 
 ```bash
 WINEPREFIX="$HOME/Games/SteamPrefix" WINE_RETINA_MODE=1 ./run.command
+```
+
+GPTK example (user-supplied Game Porting Toolkit, dedicated prefix):
+
+```bash
+WINEPREFIX="$HOME/.wine-steam-gptk" \
+GPTK_PATH="$HOME/Apple-GPTK" \
+./run.command
 ```
 
 ## What `uninstall.command` Removes
