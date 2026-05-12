@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-WINE_VERSION="${WINE_VERSION:-11.6_1}"
+WINE_VERSION="${WINE_VERSION:-11.8}"
 WINE_ROOT="${WINE_ROOT:-$HOME/wine-${WINE_VERSION}}"
 WINEPREFIX="${WINEPREFIX:-$HOME/.wine-steam-11}"
 DXMT_ROOT="${DXMT_ROOT:-$HOME/DXMT}"

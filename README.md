@@ -89,7 +89,7 @@ If Steam is running, follow the steps in "Stop" first.
 
 `run.command`:
 - Installs Rosetta 2 (only if missing; requires `sudo`).
-- Downloads Wine Staging (Gcenx macOS Wine builds) and sets up a Steam Wine prefix.
+- Downloads Wine (Gcenx macOS Wine builds) and sets up a Steam Wine prefix.
 - Downloads and installs Steam into that prefix.
 - Downloads DXMT and enables it for Wine.
 
