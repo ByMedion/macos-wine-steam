@@ -11,7 +11,9 @@ STEAM_SETUP="${STEAM_SETUP:-/tmp/SteamSetup.exe}"
 WINEPREFIX_ALIAS_NAME="${WINEPREFIX_ALIAS_NAME:-WINEPREFIX}"
 MERLOT_APPS_DIR_NAME="Merlot Apps"
 SYSTEM_APPLICATIONS_DIR="/Applications"
-TOTAL_STEPS=6
+# Cache for the compiled steamwebhelper CEF wrapper (see wrapper/README.md).
+MERLOT_DATA_DIR="${MERLOT_DATA_DIR:-$HOME/.merlot}"
+TOTAL_STEPS=7
 CURRENT_STEP=0
 
 log() {
@@ -128,6 +130,7 @@ main() {
   echo "4. WINEPREFIX: ${WINEPREFIX}"
   echo "5. DXMT_ROOT: ${DXMT_ROOT}"
   echo "6. WINE_ROOT: ${WINE_ROOT}"
+  echo "7. Merlot data (CEF wrapper cache): ${MERLOT_DATA_DIR}"
 
   log "Removing artifacts from run.command and Merlot app folders"
   remove_file "${STEAM_SETUP}" "Steam installer file"
@@ -136,6 +139,7 @@ main() {
   remove_dir "${WINEPREFIX}" "Wine prefix directory"
   remove_dir "${DXMT_ROOT}" "DXMT directory"
   remove_dir "${WINE_ROOT}" "Wine root directory"
+  remove_dir "${MERLOT_DATA_DIR}" "Merlot data directory (CEF wrapper cache)"
 
   log "Done"
 }

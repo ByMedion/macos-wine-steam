@@ -78,6 +78,32 @@ If Steam is running, follow the steps in "Stop" first.
 3. It may ask for your macOS password to remove `/Applications/Merlot Apps`.
 4. It will ask for confirmation for each item it wants to remove. Type `y` to remove it, or `n` to skip it (if you want to keep something).
 
+## Troubleshooting
+
+### Steam opens as a black window
+
+Steam's interface is Chromium, and under Wine on Apple Silicon it paints itself
+solid black. The scripts fix this automatically by wrapping Steam's
+`steamwebhelper.exe`, so you normally never see it.
+
+If it happens anyway:
+
+1. Quit Steam completely.
+2. Double-click `run.command` again (or relaunch your Merlot app). It rebuilds
+   and reinstalls the wrapper every launch.
+
+A Steam client update can bring the black window back for one launch, because
+Steam replaces the wrapped file. Relaunching restores it.
+
+Compiling the wrapper needs Homebrew's `mingw-w64`; if you declined the prompt,
+install it with `brew install mingw-w64` and relaunch. Technical details are in
+[`wrapper/README.md`](wrapper/README.md).
+
+### Steam starts but no window appears
+
+A previous crash can leave Chromium lock files behind. `run.command` clears them
+on launch while Steam is stopped, so quit Steam fully and run it again.
+
 ## Notes
 
 - Apple Silicon only. Intel Macs are not supported by this script.
@@ -92,6 +118,9 @@ If Steam is running, follow the steps in "Stop" first.
 - Downloads Wine (Gcenx macOS Wine builds) and sets up a Steam Wine prefix.
 - Downloads and installs Steam into that prefix.
 - Downloads DXMT and enables it for Wine.
+- Builds and installs a small `steamwebhelper` wrapper that stops Steam's own
+  interface from rendering as a black window (see Troubleshooting). The first
+  run offers to install Homebrew's `mingw-w64` to compile it.
 
 `uninstall.command`:
 - Removes files/directories created by `run.command` (with per-item confirmation).

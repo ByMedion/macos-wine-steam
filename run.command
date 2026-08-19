@@ -2,6 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="${SCRIPT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
+# Directory holding this script and the files shipped next to it. Unlike
+# SCRIPT_DIR -- which callers override so the WINEPREFIX alias lands beside the
+# .app bundle -- this always resolves to the repo root, or to Contents/Resources
+# inside a generated Merlot app.
+RUN_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 WINE_VERSION="${WINE_VERSION:-11.10}"
 DXMT_VERSION="${DXMT_VERSION:-0.74}"
@@ -27,6 +32,15 @@ WINE_RETINA_MODE="${WINE_RETINA_MODE:-0}" # 1=enable RetinaMode, 0=disable Retin
 # 0=keep the original foreground behavior (Terminal window must stay open).
 MERLOT_DETACH="${MERLOT_DETACH:-1}"
 MERLOT_STEAM_LOG="${MERLOT_STEAM_LOG:-${TMPDIR:-/tmp}/merlot-steam.log}"
+# Steam's CEF UI renders as a solid black window under Wine on Apple Silicon.
+# 1=install and deploy the steamwebhelper wrapper that fixes it (Default).
+# 0=skip it (expect a black Steam window). See wrapper/README.md.
+MERLOT_CEF_WRAPPER="${MERLOT_CEF_WRAPPER:-1}"
+# Flags passed to steam.exe. -noverifyfiles is required: without it Steam's
+# boot-time checksum pass restores Valve's steamwebhelper.exe over the wrapper
+# and the black window comes back. -no-cef-sandbox is needed because Chromium's
+# sandbox relies on Windows integrity tokens Wine does not model.
+MERLOT_CEF_ARGS="${MERLOT_CEF_ARGS--no-cef-sandbox -cef-single-process -noverifyfiles}"
 # Default before we added this: the value is not set in registry (Wine internal default).
 # Set to force|enable|disable to override, or leave empty to keep default.
 WINE_MOUSE_WARP_OVERRIDE="${WINE_MOUSE_WARP_OVERRIDE:-}"
@@ -275,6 +289,11 @@ enable_dxmt_env() {
 
   export DXMT_LOG_LEVEL="${DXMT_LOG_LEVEL:-error}"
   export WINEDEBUG="${WINEDEBUG:--all,err+all}"
+
+  # bcrypt/ncrypt builtin: Wine's stubs collide with Chromium's BoringSSL.
+  # gameoverlayrenderer disabled: its D3D11 hook deadlocks games under DXMT, and
+  # unchecking the in-game overlay does not stop the DLL being injected.
+  export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-bcrypt=b;ncrypt=b;gameoverlayrenderer,gameoverlayrenderer64=d}"
 }
 
 use_gptk() {
@@ -330,6 +349,51 @@ enable_gptk_env() {
   echo "WINEDLLOVERRIDES=${WINEDLLOVERRIDES}"
 }
 
+ensure_cef_wrapper() {
+  [[ "${MERLOT_CEF_WRAPPER}" == "0" || "${MERLOT_CEF_WRAPPER}" == "1" ]] \
+    || die "MERLOT_CEF_WRAPPER must be 0 or 1."
+
+  if [[ "${MERLOT_CEF_WRAPPER}" == "0" ]]; then
+    log "Skipping steamwebhelper wrapper (MERLOT_CEF_WRAPPER=0)"
+    return
+  fi
+
+  log "Ensuring steamwebhelper wrapper (fixes the black Steam UI)"
+  local installer="${RUN_DIR}/wrapper/install-wrapper.sh"
+  if [[ ! -x "${installer}" ]]; then
+    echo "Wrapper installer not found at ${installer}."
+    echo "Steam's UI will render as a black window. See wrapper/README.md."
+    return
+  fi
+
+  # Steam restores its own helper during boot, so this runs on every launch,
+  # not just the first one. Building only happens when the cache is empty.
+  if WINEPREFIX="${WINEPREFIX}" "${installer}"; then
+    return
+  fi
+
+  echo "Could not install the wrapper; Steam's UI may render black."
+  echo "See wrapper/README.md, or set MERLOT_CEF_WRAPPER=0 to silence this."
+}
+
+purge_chromium_locks() {
+  # A crashed Steam leaves Chromium singleton locks behind; the next launch then
+  # trips the single-instance guard and falls back to --silent, with no window.
+  local htmlcache="${WINEPREFIX}/drive_c/users/${USER}/AppData/Local/Steam/htmlcache"
+  [[ -d "${htmlcache}" ]] || return 0
+
+  # Only safe while Steam is stopped: pulling the lock out from under a live
+  # instance would let a second one start alongside it.
+  if pgrep -f "Steam[\\\\/]steam\.exe" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  log "Purging stale Chromium locks"
+  find "${htmlcache}" -maxdepth 2 \
+    \( -name "Singleton*" -o -name "*.lock" -o -name "CrashpadMetrics*.pma" \) \
+    -delete 2>/dev/null || true
+}
+
 launch_steam() {
   log "Launching Steam"
   local steam_exe
@@ -337,6 +401,12 @@ launch_steam() {
   [[ -n "${steam_exe}" ]] || die "steam.exe not found."
 
   local -a steam_cmd=("${WINE_BIN}" "${steam_exe}")
+  if [[ -n "${MERLOT_CEF_ARGS}" ]]; then
+    # Intentionally unquoted: MERLOT_CEF_ARGS is a space-separated flag list.
+    # shellcheck disable=SC2206
+    local -a cef_args=(${MERLOT_CEF_ARGS})
+    steam_cmd+=("${cef_args[@]}")
+  fi
   if [[ -n "${STEAM_GAME_ID:-}" ]]; then
     echo "Launching Steam game ${STEAM_GAME_ID}..."
     steam_cmd+=(-applaunch "${STEAM_GAME_ID}")
@@ -378,6 +448,8 @@ main() {
     ensure_dxmt_installed
     enable_dxmt_env
   fi
+  ensure_cef_wrapper
+  purge_chromium_locks
   launch_steam
 }
 
