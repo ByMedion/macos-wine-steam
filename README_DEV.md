@@ -37,6 +37,24 @@ https://www.reddit.com/r/macgaming/comments/1r8vsnj/how_to_play_windows_steam_ga
     - copies the D3DMetal DLLs into `${WINEPREFIX}/drive_c/windows/system32/` and sets `WINEDLLOVERRIDES=d3d9,d3d10core,d3d11,d3d12,d3d12core,dxgi=n` (unless the caller already set `WINEDLLOVERRIDES`)
     - GPTK is **not** downloaded by this script -- Apple's EULA forbids redistribution, so you must obtain it from developer.apple.com yourself
     - a dedicated prefix (e.g. `WINEPREFIX=~/.wine-steam-gptk`) is recommended so GPTK and DXMT DLLs do not accumulate in the same prefix
+- Steam CEF UI fix (`MERLOT_CEF_WRAPPER`, on by default):
+  - Steam's client UI renders as a **solid black window** under Wine on Apple
+    Silicon. CEF's ANGLE D3D11 backend cannot query the DXGI adapter, falls back
+    to GLES 2.0 (CEF needs 3.0), disables the GPU, and paints its
+    transparent-background window black. This is not DXMT-specific -- Wine's
+    builtin `d3d11`/`dxgi` hit the same failure.
+  - Builds (once) and deploys `wrapper/` over `steamwebhelper.exe`, which injects
+    `--disable-gpu --single-process` and delegates to the renamed original.
+    Requires Homebrew's `mingw-w64`; it is offered for install on first run.
+  - Re-deploys on **every** launch, because Steam's boot-time checksum pass
+    restores Valve's original binary over the wrapper.
+  - Launches Steam with `MERLOT_CEF_ARGS`, which includes `-noverifyfiles` to
+    stop that checksum pass. Without it the wrapper is evicted and the black
+    window returns. See `wrapper/README.md` for the full analysis.
+- Chromium lock purge:
+  - Deletes stale `Singleton*` / `*.lock` files from the prefix's Steam
+    `htmlcache` when Steam is not running. Left behind by a crash, they trip
+    Chromium's single-instance guard and Steam starts with no window at all.
 - Launch mode:
   - Default (`MERLOT_DETACH=1`) runs Steam with `nohup ... & disown`, redirecting stdout/stderr to `${MERLOT_STEAM_LOG}` (defaults to `${TMPDIR:-/tmp}/merlot-steam.log`). The Terminal window can be closed immediately after launch without killing Steam.
   - `MERLOT_DETACH=0` preserves the pre-patch foreground behavior (Terminal window must stay open).
@@ -79,6 +97,23 @@ Defaults are the values in `run.command`.
   - `0` keeps the old foreground behavior.
 - `MERLOT_STEAM_LOG`
   - Path to the detached-mode Steam log (default: `${TMPDIR:-/tmp}/merlot-steam.log`).
+- `MERLOT_CEF_WRAPPER`
+  - `1` (default) builds/deploys the steamwebhelper wrapper that fixes the black
+    Steam UI. `0` skips it entirely -- expect a black window.
+- `MERLOT_CEF_ARGS`
+  - Flags passed to `steam.exe`
+    (default: `-no-cef-sandbox -cef-single-process -noverifyfiles`).
+  - **`-noverifyfiles` is load-bearing.** Without it Steam's checksum pass
+    restores its own `steamwebhelper.exe` over the wrapper during boot, and the
+    black window comes back on the next launch.
+  - Set to empty to pass no extra flags.
+- `MERLOT_WRAPPER_CACHE`
+  - Where the compiled wrapper is cached
+    (default: `~/.merlot/cef-wrapper/steamwebhelper.exe`). Cached outside the
+    repo so installed `Merlot Apps` bundles can redeploy it without a toolchain.
+- `MERLOT_WRAPPER_AUTO_BREW`
+  - `1` installs `mingw-w64` via Homebrew without prompting. Useful for
+    unattended runs; otherwise the build asks first.
 
 Example overrides (environment variables):
 
@@ -142,8 +177,14 @@ Merlot Apps/
       Resources/
         merlot.env             # Runtime env generated from merlot_configs/*.conf
         run.command            # Copied from repo root at install time
+        wrapper/               # steamwebhelper CEF wrapper (source + installer)
         AppIcon.icns           # Icon for that app
 ```
+
+`run.command` resolves `wrapper/` relative to its own location, so the directory
+has to travel inside each bundle. At launch the bundle normally just redeploys
+the binary cached in `~/.merlot`; the source is shipped so it can rebuild if that
+cache is ever cleared.
 
 ### How it works
 
@@ -173,6 +214,9 @@ cp merlot_configs/template.conf.example merlot_configs/my-game.conf
 
 ### Source files
 
+- `wrapper/` - steamwebhelper CEF wrapper that fixes the black Steam UI
+  (vendored from [notpop/steam-on-m1-wine](https://github.com/notpop/steam-on-m1-wine),
+  MIT; see `wrapper/README.md`)
 - `app/merlot/MerlotLauncher` - shared launcher script for generated apps
 - `app/merlot/AppIcon.icns` - app icon
 - `merlot_configs/*.conf` - per-game launcher metadata and `run.command` environment overrides

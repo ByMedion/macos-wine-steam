@@ -190,6 +190,14 @@ build_from_config() (
   cp "${SCRIPT_DIR}/run.command" "${build_dir}/Contents/Resources/run.command"
   chmod +x "${build_dir}/Contents/Resources/run.command"
 
+  # run.command resolves the CEF wrapper relative to itself, so it has to travel
+  # inside the bundle. Launches normally just redeploy the cached binary from
+  # ~/.merlot, but shipping the source lets a bundle rebuild it if that is gone.
+  if [[ -d "${SCRIPT_DIR}/wrapper" ]]; then
+    cp -R "${SCRIPT_DIR}/wrapper" "${build_dir}/Contents/Resources/wrapper"
+    chmod +x "${build_dir}/Contents/Resources/wrapper/install-wrapper.sh"
+  fi
+
   write_runtime_env "${build_dir}/Contents/Resources/merlot.env"
 )
 
